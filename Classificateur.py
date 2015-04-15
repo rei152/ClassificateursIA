@@ -6,13 +6,15 @@ import random
 DIR_POSEV = './pos'
 DIR_NEGEV = './neg'
 
+# map mots -> occurence
+
 def getCorpus(DIR):
 
     corpusTrain,corpusTest = [],[]
 
     LEN = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
 
-    for i in range(0,int(LEN*0.1)):
+    for i in range(0,int(LEN*0.2)):
         while(True):
             n = random.randint(0,999)
             if(n not in corpusTest):
