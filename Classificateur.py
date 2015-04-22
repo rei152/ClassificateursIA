@@ -129,6 +129,9 @@ def main():
     getFolderList_TAGGED(mapNegWords,"./tagged/neg")
     getFolderList_TAGGED(mapPosWords,"./tagged/pos")
 
+    totalWords = len(mapNegWords)+len(mapPosWords)
+    print(totalWords)
+
     print("Negative words")
     print(mapNegWords)
     print(len(mapNegWords))
@@ -137,10 +140,25 @@ def main():
     print(mapPosWords)
     print(len(mapPosWords))
 
-    totalWords = len(mapNegWords)+len(mapPosWords)
-    print(totalWords)
+    print("proba neg")
+    mapNegProba = calculOccurance(mapNegWords,totalWords)
+    print(mapNegProba)
+
+    print("proba pos")
+    mapPosProba = calculOccurance(mapPosWords,totalWords)
+    print(mapPosProba)
 
 
+
+
+
+def calculOccurance(mapWord,totalWord):
+    newMap = {}
+
+    for i in mapWord:
+        newMap[i] = mapWord[i]/totalWord
+
+    return newMap
 
 if __name__ == '__main__':
     main()
