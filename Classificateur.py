@@ -1,4 +1,4 @@
-__author__ = 'andy.cheung'
+import codecs
 
 import os, sys
 import random
@@ -38,11 +38,112 @@ corpusTrainNeg = []
 global DIR_NEGEV
 global DIR_POSEV
 
-corpusTestPos, corpusTrainPos = getCorpus(DIR_NEGEV)
-corpusTestNeg, corpusTrainNeg = getCorpus(DIR_POSEV)
 
-print(corpusTestPos)
-print(corpusTrainPos)
+# map mots -> occurence
+def loadFile_TAGGED(dico, DIR):
+    # print("--- lecture fichier ---")
+
+    # Open a file
+    # print(DIR)
+    file = codecs.open(DIR, "r",'utf-8')
+    # print("Name of the file: ", file.name)
+
+    line = file.read()
+    # print("Read Line: %s" % (line))
+    poubelle = line.split('\n')
+    # print(len(poubelle))
+    # print(poubelle)
+
+    for i in range(len(poubelle)-1):
+        # print("poubelle " + poubelle[i])
+        try:
+            mot = poubelle[i].split('\t')[2].rstrip('\r')
+        except IndexError:
+            mot = poubelle[i].rstrip('\r')
+
+        # print(mot)
+
+        if(mot in dico):
+            dico[mot] += 1
+        else:
+            dico[mot] = 1
+
+    # Close opend file
+    file.close()
+
+
+def getFolderList_TAGGED(dico,DIR):
+    f = []
+    for file in os.listdir(DIR):
+        if file.endswith(".txt"):
+            # print(file)
+            f.append(file)
+
+    newf = random.shuffle(f)
+    # print(f)
+
+    for n in range(len(f)):
+        loadFile_TAGGED(dico, DIR+"/"+f[n])
+
+def loadForbidden(DIR, listForbiddenWords):
+    # print("--- lecture fichier ---")
+    # Open a file
+
+    file = codecs.open(DIR, "r",'utf-8')
+    # print("Name of the file: ", file.name)
+
+    line = file.read()
+
+    # print("Read Line: %s" % (line))
+    poubelle = line.split('\r\n')
+
+    for i in poubelle:
+        # print(i)
+        listForbiddenWords.append(i)
+
+    print("listForbiddenWords")
+    print(listForbiddenWords)
+    # Close opend file
+    file.close()
+
+
+
+def main():
+    forbidden = []
+
+    totalWords = 0
+
+    mapNegWords = {}
+    mapNegProba = {}
+
+    mapPosWords = {}
+    mapPosProba = {}
+
+    corpusTestPos, corpusTrainPos = getCorpus(DIR_NEGEV)
+    corpusTestNeg, corpusTrainNeg = getCorpus(DIR_POSEV)
+
+    print(corpusTestPos)
+    print(corpusTrainPos)
+
+    loadForbidden("frenchST.txt",forbidden)
+    getFolderList_TAGGED(mapNegWords,"./tagged/neg")
+    getFolderList_TAGGED(mapPosWords,"./tagged/pos")
+
+    print("Negative words")
+    print(mapNegWords)
+    print(len(mapNegWords))
+
+    print("Positive words")
+    print(mapPosWords)
+    print(len(mapPosWords))
+
+    totalWords = len(mapNegWords)+len(mapPosWords)
+    print(totalWords)
+
+
+
+if __name__ == '__main__':
+    main()
 
 # LEN_NEG = len([name for name in os.listdir(DIR_NEGEV) if os.path.isfile(os.path.join(DIR_NEGEV, name))])
 # LEN_POS = len([name for name in os.listdir(DIR_POSEV) if os.path.isfile(os.path.join(DIR_POSEV, name))])
