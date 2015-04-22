@@ -1,32 +1,32 @@
 import codecs
 
 import os, sys
-import random
+import random,math
 
 DIR_POSEV = './pos'
 DIR_NEGEV = './neg'
 
 # map mots -> occurence
 
-def getCorpus(DIR):
-
-    corpusTrain,corpusTest = [],[]
-
-    LEN = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
-
-    for i in range(0,int(LEN*0.2)):
-        while(True):
-            n = random.randint(0,999)
-            if(n not in corpusTest):
-                break
-
-        corpusTest.append(n)
-
-        for i in range (LEN):
-            if(i not in corpusTest):
-                corpusTrain.append(i)
-
-    return corpusTest, corpusTrain
+# def getCorpus(DIR,forbiddenWords):
+#
+#     corpusTrain,corpusTest = [],[]
+#
+#     LEN = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
+#
+#     for i in range(0,int(LEN*0.2)):
+#         while(True):
+#             n = random.randint(0,999)
+#             if(n not in corpusTest):
+#                 break
+#
+#         corpusTest.append(n)
+#
+#         for i in range (LEN):
+#             if(i not in corpusTest):
+#                 corpusTrain.append(i)
+#
+#     return corpusTest, corpusTrain
 
 corpusTestPos = []
 corpusTestNeg = []
@@ -40,8 +40,69 @@ global DIR_POSEV
 
 
 # map mots -> occurence
-def loadFile_TAGGED(dico, DIR):
+def loadFile_TAGGED(DIR):
     # print("--- lecture fichier ---")
+
+    dico = {}
+
+    # Open a file
+    # print(DIR)
+    file = codecs.open(DIR, "r",'utf-8')
+    # print("Name of the file: ", file.name)
+
+    line = file.read()
+    # print("Read Line: %s" % (line))
+    poubelle = line.split('\n')
+    # print(len(poubelle))
+    # print(poubelle)
+
+    for i in range(len(poubelle)-1):
+        # print("poubelle " + poubelle[i])
+        try:
+            mot = poubelle[i].split('\t')[2].rstrip('\r')
+        except IndexError:
+            mot = poubelle[i].rstrip('\r')
+
+        # print(mot)
+
+        if(mot in dico):
+            dico[mot] += 1
+        else:
+            dico[mot] = 1
+
+    # Close opend file
+    file.close()
+
+    return dico
+
+
+def getFolderList_TAGGED(DIR):
+    f = []
+
+    corpusTrain,corpusTest = [],[]
+
+    for file in os.listdir(DIR):
+        if file.endswith(".txt"):
+            # print(file)
+            f.append(file)
+
+    # randomise la liste
+    random.shuffle(f)
+
+    for n in range(int(len(f))):
+        if(n < int(len(f) * 0.2)):
+            # corpusTrain = loadFile_TAGGED(mapWord, DIR+"/"+f[n])
+            corpusTest = loadFile_TAGGED(DIR+"/"+f[n])
+        else:
+            corpusTrain = loadFile_TAGGED(DIR+"/"+f[n])
+
+    return corpusTrain,corpusTest
+
+
+    return corpusTrain,corpusTest
+
+def loadFIleToMap(DIR, mapToPeuple):
+    dico = {}
 
     # Open a file
     # print(DIR)
@@ -72,84 +133,72 @@ def loadFile_TAGGED(dico, DIR):
     file.close()
 
 
-def getFolderList_TAGGED(dico,DIR):
-    f = []
-    for file in os.listdir(DIR):
-        if file.endswith(".txt"):
-            # print(file)
-            f.append(file)
-
-    newf = random.shuffle(f)
-    # print(f)
-
-    for n in range(len(f)):
-        loadFile_TAGGED(dico, DIR+"/"+f[n])
-
-def loadForbidden(DIR, listForbiddenWords):
-    # print("--- lecture fichier ---")
-    # Open a file
-
-    file = codecs.open(DIR, "r",'utf-8')
-    # print("Name of the file: ", file.name)
-
-    line = file.read()
-
-    # print("Read Line: %s" % (line))
-    poubelle = line.split('\r\n')
-
-    for i in poubelle:
-        # print(i)
-        listForbiddenWords.append(i)
-
-    print("listForbiddenWords")
-    print(listForbiddenWords)
-    # Close opend file
-    file.close()
-
 
 
 def main():
-    forbidden = []
+    forbidden = {}
 
-    totalWords = 0
+    loadFIleToMap("frenchST.txt",forbidden)
 
-    mapNegWords = {}
+    # corpusTestPos, corpusTrainPos = getCorpus(DIR_NEGEV,forbidden)
+    # corpusTestNeg, corpusTrainNeg = getCorpus(DIR_POSEV,forbidden)
+
+
+    corpusTrainNeg,corpusTestNeg = getFolderList_TAGGED("./tagged/neg")
+    corpusTrainPos,corpusTestPos = getFolderList_TAGGED("./tagged/pos")
+    # getFolderList_TAGGED(mapPosWords,"./tagged/pos")
+
+    mapNegWords = corpusTrainNeg.update(corpusTestNeg)
+    mapPosWords = corpusTrainPos.update(corpusTestPos)
+
     mapNegProba = {}
-
-    mapPosWords = {}
     mapPosProba = {}
 
-    corpusTestPos, corpusTrainPos = getCorpus(DIR_NEGEV)
-    corpusTestNeg, corpusTrainNeg = getCorpus(DIR_POSEV)
-
+    print("corpusTestNeg")
+    print(corpusTestNeg)
+    print("corpusTestPos")
     print(corpusTestPos)
-    print(corpusTrainPos)
 
-    loadForbidden("frenchST.txt",forbidden)
-    getFolderList_TAGGED(mapNegWords,"./tagged/neg")
-    getFolderList_TAGGED(mapPosWords,"./tagged/pos")
+    totalWords = len(corpusTrainNeg)+len(corpusTrainPos)
 
-    totalWords = len(mapNegWords)+len(mapPosWords)
-    print(totalWords)
-
-    print("Negative words")
-    print(mapNegWords)
-    print(len(mapNegWords))
-
-    print("Positive words")
-    print(mapPosWords)
-    print(len(mapPosWords))
+    # print(totalWords)
+    # print("Negative words")
+    # print(mapNegWords)
+    # print(len(mapNegWords))
+    #
+    # print("Positive words")
+    # print(mapPosWords)
+    # print(len(mapPosWords))
 
     print("proba neg")
-    mapNegProba = calculOccurance(mapNegWords,totalWords)
+    mapNegProba = calculOccurance(corpusTrainNeg,totalWords)
     print(mapNegProba)
 
     print("proba pos")
-    mapPosProba = calculOccurance(mapPosWords,totalWords)
+    mapPosProba = calculOccurance(corpusTrainPos,totalWords)
     print(mapPosProba)
 
+    eval("tagged/neg/neg-0095.txt",corpusTestNeg)
 
 
+def eval(FILE_DIR, corpusTrain):
+    dicoMyWord = {}
+    dicoEval = {}
+
+    valusEval = 0
+
+    loadFIleToMap(FILE_DIR,dicoMyWord)
+
+    for i in dicoMyWord:
+        if corpusTrain.contains_key(i):
+            dicoEval[i] = corpusTrain[i]
+
+    for i in dicoEval:
+        valusEval*=float(math.log(dicoEval[i],10))
+
+    print(valusEval)
+
+    return valusEval
 
 
 def calculOccurance(mapWord,totalWord):
