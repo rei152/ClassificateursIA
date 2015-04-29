@@ -102,10 +102,9 @@ def getFolderList_TAGGED(DIR):
     return corpusTrain,corpusTest
 
 def loadFIleToMap(DIR, mapToPeuple):
-    dico = {}
+    # mapToPeuple = {}
 
     # Open a file
-    # print(DIR)
     file = codecs.open(DIR, "r",'utf-8')
     # print("Name of the file: ", file.name)
 
@@ -124,16 +123,13 @@ def loadFIleToMap(DIR, mapToPeuple):
 
         # print(mot)
 
-        if(mot in dico):
-            dico[mot] += 1
+        if(mot in mapToPeuple):
+            mapToPeuple[mot] += 1
         else:
-            dico[mot] = 1
+            mapToPeuple[mot] = 1
 
     # Close opend file
     file.close()
-
-
-
 
 def main():
     forbidden = {}
@@ -143,21 +139,20 @@ def main():
     # corpusTestPos, corpusTrainPos = getCorpus(DIR_NEGEV,forbidden)
     # corpusTestNeg, corpusTrainNeg = getCorpus(DIR_POSEV,forbidden)
 
-
     corpusTrainNeg,corpusTestNeg = getFolderList_TAGGED("./tagged/neg")
     corpusTrainPos,corpusTestPos = getFolderList_TAGGED("./tagged/pos")
     # getFolderList_TAGGED(mapPosWords,"./tagged/pos")
 
-    mapNegWords = corpusTrainNeg.update(corpusTestNeg)
-    mapPosWords = corpusTrainPos.update(corpusTestPos)
+    # mapNegWords = corpusTrainNeg.update(corpusTestNeg)
+    # mapPosWords = corpusTrainPos.update(corpusTestPos)
 
-    mapNegProba = {}
-    mapPosProba = {}
+    # mapNegProba = {}
+    # mapPosProba = {}
 
-    print("corpusTestNeg")
-    print(corpusTestNeg)
-    print("corpusTestPos")
-    print(corpusTestPos)
+    # print("corpusTestNeg")
+    # print(corpusTestNeg)
+    # print("corpusTestPos")
+    # print(corpusTestPos)
 
     totalWords = len(corpusTrainNeg)+len(corpusTrainPos)
 
@@ -178,25 +173,36 @@ def main():
     mapPosProba = calculOccurance(corpusTrainPos,totalWords)
     print(mapPosProba)
 
-    eval("tagged/neg/neg-0095.txt",corpusTestNeg)
+    valusNeg = eval(mapNegProba,corpusTestNeg)
+    valusPos = eval(mapPosProba,corpusTrainPos)
+
+    if valusPos > valusNeg:
+        print("Test positive, précision", valusPos)
+    else:
+        print("Test negative, précision", valusNeg)
 
 
-def eval(FILE_DIR, corpusTrain):
-    dicoMyWord = {}
+def eval(dicoMyWord, corpusTrain):
+    # dicoMyWord = {}
+
     dicoEval = {}
-
     valusEval = 0
-
-    loadFIleToMap(FILE_DIR,dicoMyWord)
+    # loadFIleToMap(FILE_DIR,dicoMyWord)
 
     for i in dicoMyWord:
-        if corpusTrain.contains_key(i):
+        if i in corpusTrain:
             dicoEval[i] = corpusTrain[i]
 
-    for i in dicoEval:
-        valusEval*=float(math.log(dicoEval[i],10))
+    for i in dicoEval.keys():
+        # print(" -- eval -- ")
+        # print(math.log(dicoEval[i],10))
+        # print(valusEval)
 
-    print(valusEval)
+        # valusEval+=dicoEval[i]
+        valusEval+=math.log(dicoEval[i],10)
+
+    # print(dicoEval)
+    # print("final val : " + str(valusEval))
 
     return valusEval
 
