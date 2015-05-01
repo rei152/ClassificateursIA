@@ -52,9 +52,8 @@ def loadFile_TAGGED(DIR):
 
     line = file.read()
     # print("Read Line: %s" % (line))
+
     poubelle = line.split('\n')
-    # print(len(poubelle))
-    # print(poubelle)
 
     for i in range(len(poubelle)-1):
         # print("poubelle " + poubelle[i])
@@ -69,6 +68,9 @@ def loadFile_TAGGED(DIR):
             dico[mot] += 1
         else:
             dico[mot] = 1
+
+        # estimationLaplace(dico)
+
 
     # Close opend file
     file.close()
@@ -98,9 +100,6 @@ def getFolderList_TAGGED(DIR):
 
     return corpusTrain,corpusTest
 
-
-    return corpusTrain,corpusTest
-
 def loadFIleToMap(DIR, mapToPeuple):
     # mapToPeuple = {}
 
@@ -114,14 +113,12 @@ def loadFIleToMap(DIR, mapToPeuple):
     # print(len(poubelle))
     # print(poubelle)
 
-    for i in range(len(poubelle)-1):
+    for i in range(len(poubelle)):
         # print("poubelle " + poubelle[i])
         try:
             mot = poubelle[i].split('\t')[2].rstrip('\r')
         except IndexError:
             mot = poubelle[i].rstrip('\r')
-
-        # print(mot)
 
         if(mot in mapToPeuple):
             mapToPeuple[mot] += 1
@@ -130,6 +127,10 @@ def loadFIleToMap(DIR, mapToPeuple):
 
     # Close opend file
     file.close()
+
+def estimationLaplace(estimationMap):
+    for i in estimationMap.keys():
+        estimationMap[i] += 1
 
 def main():
     forbidden = {}
@@ -155,6 +156,11 @@ def main():
     # print(corpusTestPos)
 
     totalWords = len(corpusTrainNeg)+len(corpusTrainPos)
+    corpus = mergeMap(corpusTrainNeg,corpusTrainPos)
+    print(len(corpus))
+
+    # corpus = dict(corpusTrainNeg.items() + corpusTrainPos.items())
+    print("Corpsu %s",corpus)
 
     # print(totalWords)
     # print("Negative words")
@@ -167,13 +173,13 @@ def main():
 
     print("proba neg")
     mapNegProba = calculOccurance(corpusTrainNeg,totalWords)
-    print(mapNegProba)
+    print(corpusTrainNeg)
 
     print("proba pos")
     mapPosProba = calculOccurance(corpusTrainPos,totalWords)
     print(mapPosProba)
 
-    valusNeg = eval(mapNegProba,corpusTestNeg)
+    valusNeg = eval(mapNegProba,corpusTrainNeg)
     valusPos = eval(mapPosProba,corpusTrainPos)
 
     if valusPos > valusNeg:
@@ -181,25 +187,56 @@ def main():
     else:
         print("Test negative, précision", valusNeg)
 
+def mergeMap(dicoA, dicoB):
+
+    newDico = dicoA.copy()
+
+    for i in dicoB.keys():
+        if i in newDico:
+            newDico[i]+= dicoB[i]
+
+        else:
+            newDico[i] = dicoB[i]
+
+    return newDico
 
 def eval(dicoMyWord, corpusTrain):
     # dicoMyWord = {}
+    print(corpusTrain)
+    print(dicoMyWord)
 
     dicoEval = {}
-    valusEval = 0
+    valusEval = 1
     # loadFIleToMap(FILE_DIR,dicoMyWord)
 
-    for i in dicoMyWord:
+    for i in dicoMyWord.keys():
         if i in corpusTrain:
-            dicoEval[i] = corpusTrain[i]
+            dicoEval[i] = dicoMyWord[i]
+
+            # print(" -- insert dico -- ")
+            # print(i)
+            # print(dicoEval[i])
 
     for i in dicoEval.keys():
-        # print(" -- eval -- ")
-        # print(math.log(dicoEval[i],10))
-        # print(valusEval)
-
+        # valueLog = math.log(math.pow(dicoEval[i],corpusTrain[i]))
         # valusEval+=dicoEval[i]
-        valusEval+=math.log(dicoEval[i],10)
+        valusEval+=math.pow(dicoEval[i],corpusTrain[i])
+
+        print(" -- eval -- ")
+        print(i)
+        print(dicoEval[i])
+
+        print(" -- corpus train -- ")
+        print(corpusTrain[i])
+
+
+        print(" -- valuesEval -- ")
+        print(valusEval)
+
+        print()
+
+    valueLog = math.log(valusEval)
+    print(valueLog)
 
     # print(dicoEval)
     # print("final val : " + str(valusEval))
@@ -212,47 +249,10 @@ def calculOccurance(mapWord,totalWord):
 
     for i in mapWord:
         newMap[i] = mapWord[i]/totalWord
+        # print(" --- occurance calcule --- ")
+        # print(newMap[i])
 
     return newMap
 
 if __name__ == '__main__':
     main()
-
-# LEN_NEG = len([name for name in os.listdir(DIR_NEGEV) if os.path.isfile(os.path.join(DIR_NEGEV, name))])
-# LEN_POS = len([name for name in os.listdir(DIR_POSEV) if os.path.isfile(os.path.join(DIR_POSEV, name))])
-#
-# corpusTestPos = []
-# corpusTestNeg = []
-#
-# corpusTrainPos = []
-# corpusTrainNeg = []
-#
-# n = -1
-#
-# for i in range(0,int(LEN_POS*0.1)):
-#
-#     while(True):
-#         n = random.randint(0,999)
-#         if(n not in corpusTestPos):
-#             break
-#
-#     corpusTestPos.append(n)
-#
-# for i in range (LEN_POS):
-#     if(i not in corpusTestPos):
-#         corpusTrainPos.append(i)
-#
-#
-#
-# for i in range(0,int(LEN_NEG*0.1)):
-#
-#     while(True):
-#         n = random.randint(0,999)
-#         if(n not in corpusTestNeg):
-#             break
-#
-#     corpusTestNeg.append(n)
-#
-# for i in range (LEN_NEG):
-#     if(i not in corpusTestNeg):
-#         corpusTrainNeg.append(i)
