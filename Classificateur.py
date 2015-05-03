@@ -1,3 +1,7 @@
+# ------------------------------
+# Ahthors : Andy Cheung, Eddy Strambini
+# -----------------------------
+
 import codecs
 
 import os, sys
@@ -33,13 +37,13 @@ def loadFile_TAGGED(DIR):
     file = codecs.open(DIR, "r",'utf-8')
     line = file.read()
 
-    poubelle = line.split('\n')
+    dicoSplit = line.split('\n')
 
-    for i in range(len(poubelle)-1):
+    for i in range(len(dicoSplit)-1):
         try:
-            mot = poubelle[i].split('\t')[2].rstrip('\r')
+            mot = dicoSplit[i].split('\t')[2].rstrip('\r')
         except IndexError:
-            mot = poubelle[i].rstrip('\r')
+            mot = dicoSplit[i].rstrip('\r')
 
         if(mot in dico):
             dico[mot] += 1
@@ -80,23 +84,23 @@ def getFolderList_TAGGED(DIR):
 # ------------------------------
 # Charge les mots dans une map et compte leurs appararitions
 # -----------------------------
-def loadFIleToMap(DIR, mapToPeuple):
+def loadFIleToMap(DIR, mapToPopulate):
 
     # Open a file
     file = codecs.open(DIR, "r",'utf-8')
     line = file.read()
-    poubelle = line.split('\n')
+    dicoSplit = line.split('\n')
 
-    for i in range(len(poubelle)):
+    for i in range(len(dicoSplit)):
         try:
-            mot = poubelle[i].split('\t')[2].rstrip('\r')
+            mot = dicoSplit[i].split('\t')[2].rstrip('\r')
         except IndexError:
-            mot = poubelle[i].rstrip('\r')
+            mot = dicoSplit[i].rstrip('\r')
 
-        if(mot in mapToPeuple):
-            mapToPeuple[mot] += 1
+        if(mot in mapToPopulate):
+            mapToPopulate[mot] += 1
         else:
-            mapToPeuple[mot] = 1
+            mapToPopulate[mot] = 1
 
     # Close opend file
     file.close()
@@ -117,7 +121,7 @@ def removeForbidden(wordsMap, forbiddenList):
 # ------------------------------
 # Fonction Bayes
 # -----------------------------
-def FromBayesWithLove(withForbidden = 1):
+def BayesFunction(isForbidden = 1):
     forbidden = {}
 
     loadFIleToMap("frenchST.txt", forbidden)
@@ -126,7 +130,7 @@ def FromBayesWithLove(withForbidden = 1):
     corpusTrainNeg, corpusTestNeg = getFolderList_TAGGED("./tagged/neg")
     corpusTrainPos, corpusTestPos = getFolderList_TAGGED("./tagged/pos")
 
-    if withForbidden == 0:
+    if isForbidden == 0:
         corpusTrainNeg = removeForbidden(corpusTrainNeg,forbiddenWords)
         corpusTestNeg = removeForbidden(corpusTestNeg,forbiddenWords)
         corpusTrainPos = removeForbidden(corpusTrainPos,forbiddenWords)
@@ -142,7 +146,7 @@ def FromBayesWithLove(withForbidden = 1):
     # print(corpusTestPos)
 
     # totalWords = len(corpusTrainNeg) + len(corpusTrainPos)
-    corpus = mergeMap(corpusTrainNeg, corpusTrainPos)
+    corpus = mergeMaps(corpusTrainNeg, corpusTrainPos)
     # print("corpus len: ", len(corpus))
     totalWords = len(corpus)
     # corpus = dict(corpusTrainNeg.items() + corpusTrainPos.items())
@@ -204,7 +208,7 @@ def checkPrecision(corpusTrainPos,corpusTestPos,corpusTrainNeg,corpusTestNeg):
 # ------------------------------
 # Fusionne deux maps
 # -----------------------------
-def mergeMap(dicoA, dicoB):
+def mergeMaps(dicoA, dicoB):
 
     newDico = dicoA.copy()
 
@@ -268,7 +272,7 @@ def eval(dicoMyWord, corpusTrain):
     return valueTotal
 
 # ------------------------------
-# Permet de calculer les ocurances
+# Permet de calculer les ocurances des mots
 # -----------------------------
 def calculOccurance(mapWord,totalWord):
     newMap = {}
@@ -285,10 +289,10 @@ def calculOccurance(mapWord,totalWord):
 
 def main():
     print("----------- sans traitement ------------")
-    FromBayesWithLove()
+    BayesFunction()
 
     print("----------- avec traitement ------------")
-    FromBayesWithLove(0)
+    BayesFunction(0)
 
 if __name__ == '__main__':
     main()
