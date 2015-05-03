@@ -117,7 +117,7 @@ def removeForbidden(wordsMap, forbiddenList):
 # ------------------------------
 # Fonction Bayes
 # -----------------------------
-def FromBayesWithLove(withForbidden = 0):
+def FromBayesWithLove(withForbidden = 1):
     forbidden = {}
 
     loadFIleToMap("frenchST.txt", forbidden)
@@ -143,11 +143,11 @@ def FromBayesWithLove(withForbidden = 0):
 
     # totalWords = len(corpusTrainNeg) + len(corpusTrainPos)
     corpus = mergeMap(corpusTrainNeg, corpusTrainPos)
-    print("corpus len: ", len(corpus))
+    # print("corpus len: ", len(corpus))
     totalWords = len(corpus)
     # corpus = dict(corpusTrainNeg.items() + corpusTrainPos.items())
 
-    print("Corpsu: ", corpus)
+    # print("Corpsu: ", corpus)
     # print(totalWords)
     # print("Negative words")
     # print(mapNegWords)
@@ -156,13 +156,13 @@ def FromBayesWithLove(withForbidden = 0):
     # print("Positive words")
     # print(mapPosWords)
     # print(len(mapPosWords))
-    print("proba neg")
-
-    print("totalWords",totalWords)
+    # print("proba neg")
+    #
+    # print("totalWords",totalWords)
     mapNegProba = calculOccurance(corpusTrainNeg, totalWords)
 
     print(len(corpusTrainNeg))
-    print("proba pos")
+    # print("proba pos")
 
     mapPosProba = calculOccurance(corpusTrainPos, totalWords)
     print("mapPosProba",len(mapPosProba))
@@ -177,23 +177,29 @@ def FromBayesWithLove(withForbidden = 0):
     else:
         print("Test negative, précision", valusNeg)
 
+
+# ------------------------------
+# Test sur le corpus test avec le corpus train
+# -----------------------------
 def checkPrecision(corpusTrainPos,corpusTestPos,corpusTrainNeg,corpusTestNeg):
 
     countNeg = 0
     countPos = 0
 
-    print(corpusTrainPos)
-
     for i in corpusTestNeg:
-        if i in corpusTrainNeg and i not in corpusTrainPos:
+        if  i not in corpusTrainPos:
             countNeg+=1
 
     for i in corpusTestPos:
-        if i in corpusTrainPos and i not in corpusTrainNeg:
+        if i not in corpusTrainNeg:
             countPos+=1
 
-    print("Mot positiove correctement classe",countPos/len(corpusTestPos) )
-    print("Mot negative correctement classe", countNeg/len(corpusTestNeg))
+    pourcentagePos = countPos/len(corpusTestPos)*100
+    pourcentageNeg = countNeg/len(corpusTestNeg)*100
+
+    print("Mot positive correctement classe ",pourcentagePos)
+    print("Mot negative correctement classe ",pourcentageNeg)
+
 
 # ------------------------------
 # Fusionne deux maps
@@ -217,12 +223,12 @@ def mergeMap(dicoA, dicoB):
 # -----------------------------
 def eval(dicoMyWord, corpusTrain):
     # dicoMyWord = {}
-    print(corpusTrain)
-    print(dicoMyWord)
+    # print(corpusTrain)
+    # print(dicoMyWord)
 
     dicoEval = {}
 
-    valueTotal = 1
+    valueTotal = 1.0
     # loadFIleToMap(FILE_DIR,dicoMyWord)
 
     for i in dicoMyWord.keys():
@@ -236,25 +242,25 @@ def eval(dicoMyWord, corpusTrain):
         valusEval= math.pow(dicoEval[i],corpusTrain[i])
         valueLog = math.log(valusEval)
 
-        print(" ---------------- new ------------------- ")
-        print("mot: ", i)
-        print("dicoEval[i]",dicoEval[i])
-        print("corpusTrain[i]",corpusTrain[i])
-        print("valusEval",valusEval)
-        print("valueLog",valueLog)
-        print("valueTotal",valueTotal)
+        # print(" ---------------- new ------------------- ")
+        # print("mot: ", i)
+        # print("dicoEval[i]",dicoEval[i])
+        # print("corpusTrain[i]",corpusTrain[i])
+        # print("valusEval",valusEval)
+        # print("valueLog",valueLog)
+        # print("valueTotal",valueTotal)
 
         valueTotal+=valueLog
 
-        print(" -- valuesEval -- ")
-        print(valusEval)
-
-        print()
+        # print(" -- valuesEval -- ")
+        # print(valusEval)
+        #
+        # print()
 
     valueTotal += math.log(0.5)
     # valueTotal *= 0.5
 
-    print("valueTotal ",valueTotal)
+    # print("valueTotal ",valueTotal)
 
     # print(dicoEval)
     # print("final val : " + str(valusEval))
@@ -269,16 +275,20 @@ def calculOccurance(mapWord,totalWord):
 
     for i in mapWord:
         newMap[i] =( mapWord[i] + 1 )/ (len(mapWord) + totalWord)
-        print("len(mapWord)",len(mapWord))
-        print("newMap[i]", newMap[i])
-        print("totalWord",totalWord)
+        # print("len(mapWord)",len(mapWord))
+        # print("newMap[i]", newMap[i])
+        # print("totalWord",totalWord)
         # print(" --- occurance calcule --- ")
         # print(newMap[i])
 
     return newMap
 
 def main():
+    print("----------- sans traitement ------------")
     FromBayesWithLove()
+
+    print("----------- avec traitement ------------")
+    FromBayesWithLove(0)
 
 if __name__ == '__main__':
     main()
